@@ -10,7 +10,7 @@
         el sistema calculará automáticamente (Cantidad Total - Cantidad Solicitada) y propondrá este importe restante,
         en lugar de la cantidad total.
     """,
-    "depends": ["base"],
+    "depends": ["purchase_requisition"],
     "data": [],
     "assets": {},
     "license": "LGPL-3",
