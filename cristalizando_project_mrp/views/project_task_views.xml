@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form_cristalizando_inherit" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.cristalizando</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Ficha de Fabricación" name="cristalizando_fabricacion_page">
+                    <group>
+                        <group string="Identificación del Documento">
+                            <field name="obra_nr"/>
+                            <field name="obra_docu_nr"/>
+                            <field name="obra_docu_tip"/>
+                            <field name="obra_docu_fem"/>
+                            <field name="obra_docu_fc_cmpr_colo"/>
+                            <field name="obra_docu_fc_renegociada"/>
+                        </group>
+                        <group string="Especificaciones y Datos">
+                            <field name="obra_docu_estd_id"/>
+                            <field name="color_id"/>
+                            <field name="lnarti_id"/>
+                            <field name="obra_tipo_id"/>
+                            <field name="obra_docu_indi_kg"/>
+                            <field name="obra_docu_cla_comp"/>
+                            <field name="obra_docu_vano_libr_cn"/>
+                            <field name="is_nivel_dano_readonly" invisible="1"/>
+                            <field name="obra_docu_indi_vol" readonly="is_nivel_dano_readonly"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Responsables">
+                            <field name="vendedor_id"/>
+                            <field name="jefe_obra_id"/>
+                            <field name="tecnico_id"/>
+                            <field name="capataz_id"/>
+                        </group>
+                        <group string="Control de Calidad y Legajo">
+                            <field name="responsable_separar_accesorios_id"/>
+                            <field name="responsable_separar_perfiles_id"/>
+                            <field name="verificacion_legajo_jo_fecha"/>
+                            <field name="verificacion_legajo_capataz_fecha"/>
+                            <field name="explicacion_legajo_capataz_fecha"/>
+                            <field name="verificacion_carpinteria_jo_fecha"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Estado de Materiales">
+                            <field name="estado_interiores_id"/>
+                            <field name="estado_perfiles_id"/>
+                            <field name="estado_accesorios_id"/>
+                        </group>
+                        <group string="Responsables de Fabricación">
+                            <field name="responsable_corte_vidrios_id"/>
+                            <field name="responsable_armado_dvh_id"/>
+                            <field name="responsable_entrega_accesorios_id"/>
+                        </group>
+                    </group>
+                    <separator string="Planificación y Ratios"/>
+                    <group>
+                        <group string="Tiempos de Proceso (Presupuestado)">
+                            <field name="tiempo_medicion_obra"/>
+                            <field name="tiempo_armado_ot"/>
+                            <field name="tiempo_corte"/>
+                            <field name="tiempo_fabricacion"/>
+                            <field name="tiempo_colocacion"/>
+                            <field name="tiempo_cierre_obra"/>
+                        </group>
+                        <group string="Tiempos de Logística y Otros (Presupuestado)">
+                            <field name="tiempo_acarreo_materiales"/>
+                            <field name="tiempo_insumos"/>
+                            <field name="tiempo_transporte_personas"/>
+                            <field name="tiempo_viaticos"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Datos Contables">
+                            <field name="monto_total_etapa" widget="monetary"/>
+                            <!-- El campo de moneda debe estar en la vista para que el widget funcione -->
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Indicadores">
+                            <field name="ratio_fabricacion"/>
+                            <field name="ratio_colocacion"/>
+                            <field name="dias_renegociados"/>
+                            <field name="dias_para_entrega"/>
+                            <field name="ml_producto_terminado"/>
+                            <field name="m2_producto_terminado"/>
+                            <field name="m3_producto_terminado"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Servicio Externo">
+                            <field name="tipo_contenedor_transporte"/>
+                            <field name="cantidad_viajes_contenedor"/>
+                            <field name="porcentaje_carga"/>
+                            <field name="cantidad_hojas"/>
+                            <field name="cantidad_panos_fijos"/>
+                            <field name="cantidad_mosquiteros"/>
+                            <field name="ml_pano_fijo"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                    <separator string="Breve detalle de que se trata la orden"/>
+                    <field name="obra_docu_indi_otro4" placeholder="Escriba aquí los detalles..."/>
+                </page>
+                <page string="Insumos" name="cristalizando_insumos_page">
+                    <field name="insumo_line_ids">
+                        <tree editable="bottom">
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="uom_id"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
