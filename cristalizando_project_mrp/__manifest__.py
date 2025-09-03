@@ -6,15 +6,18 @@
     "summary": "Auto-generated advanced module",
     "description": "Añade campos y lógica de negocio para la gestión de obras.",
     "author": 'Juan Feijoo',
-    "depends": ["base", 'project', 'mrp'],
+    "depends": [
+        "base",
+        'Project_Custom',
+    ],
     "data": [
-        "views/project_task_views.xml"
+        "security/ir.model.access.csv",
+        "views/project_task_views.xml",
         "views/project_task_line_import_wizard_views.xml",
         "wizard/project_task_line_import_wizard_views.xml",
+        
     ],
-    "demo": [
-        "demo/project_task_data.xml"
-    ],
+    "demo": [],
     "assets": {},
     "license": "LGPL-3",
     "installable": True,
