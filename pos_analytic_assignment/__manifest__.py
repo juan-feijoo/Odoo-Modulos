@@ -11,7 +11,7 @@
         "account"
     ],
     "data": [
-        'views/pos_config_view.xml',
+        'views/account_journal_view.xml',
     ],
     "assets": {},
     "license": "LGPL-3",
