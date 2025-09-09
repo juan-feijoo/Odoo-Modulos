@@ -5,9 +5,7 @@
         Añade una validación para prevenir el desempaquetado de paquetes
         con cantidades de producto negativas.""",
     'description': """
-        Este módulo sobrescribe el método 'unpack' del modelo 'stock.quant.package'
-        para verificar que todos los productos dentro del paquete tengan una cantidad
-        igual o mayor a cero antes de permitir la operación.
+        Este módulo valida la cantidad necesaria en PEDIDOS en los paquetes 
     """,
     'author': "Juan Martin Feijoo",
     'category': 'Inventory/Warehouse',
