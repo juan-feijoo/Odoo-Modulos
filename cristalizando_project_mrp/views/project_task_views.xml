@@ -6,7 +6,10 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
+                
+                <!-- Pestaña Ficha de Fabricación (sin cambios) -->
                 <page string="Ficha de Fabricación" name="cristalizando_fabricacion_page">
+                    <!-- ... (todo el contenido de tu ficha de fabricación que ya está perfecto) ... -->
                     <group>
                         <group string="Identificación del Documento">
                             <field name="obra_nr"/>
@@ -76,7 +79,6 @@
                     <group>
                         <group string="Datos Contables">
                             <field name="monto_total_etapa" widget="monetary"/>
-                            <!-- El campo de moneda debe estar en la vista para que el widget funcione -->
                             <field name="currency_id" invisible="1"/>
                         </group>
                         <group string="Indicadores">
@@ -106,11 +108,24 @@
                     <field name="obra_docu_indi_otro4" placeholder="Escriba aquí los detalles..."/>
                 </page>
                 <page string="Insumos" name="cristalizando_insumos_page">
-                    <field name="insumo_line_ids">
-                        <tree editable="bottom">
-                            <field name="product_id"/>
-                            <field name="quantity"/>
-                            <field name="uom_id"/>
+                    <div class="o_action_box">
+                        <button name="%(cristalizando_project_mrp.project_task_line_import_wizard_action)d" 
+                                type="action" 
+                                string="Importar Insumos (Excel)" 
+                                class="btn-primary"/>
+                    </div>
+                    <field name="task_line_ids">
+                         <tree editable="bottom">
+                            <field name="product_id" string="Producto"/>
+                            <field name="x_studio_descripcion" string="Descripción"/>
+                            <field name="x_studio_tipologia" string="Tipología"/>
+                            <field name="quantity" string="Cantidad"/>
+                            <field name="uom_id" string="UdM"/>
+                            <field name="subtotal_unidad" string="Precio Unitario"/>
+                            <field name="x_studio_precio_unitario_carpinteria" string="Precio U. Carpintería"/>
+                            <field name="x_studio_codigo_distancia_km" string="Código Distancia"/>
+                            <field name="x_studio_precio_unitario_instalacion" string="Precio U. Instalación"/>
+                            <field name="subtotal" string="Subtotal"/>
                         </tree>
                     </field>
                 </page>

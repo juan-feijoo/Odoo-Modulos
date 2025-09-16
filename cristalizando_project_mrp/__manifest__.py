@@ -7,15 +7,14 @@
     "description": "Añade campos y lógica de negocio para la gestión de obras.",
     "author": 'Juan Feijoo',
     "depends": [
-        "base",
+        "project",
         'Project_Custom',
     ],
     "data": [
         "security/ir.model.access.csv",
-        "views/project_task_views.xml",
-        "views/project_task_line_import_wizard_views.xml",
         "wizard/project_task_line_import_wizard_views.xml",
-        
+        "views/project_task_views.xml",
+        'data/ir_export_data.xml',
     ],
     "demo": [],
     "assets": {},

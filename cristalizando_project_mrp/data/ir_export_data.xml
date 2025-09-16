@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="export_project_task_cristalizando_template" model="ir.exports">
+            <field name="name">Plantilla Tareas GX</field>
+            <field name="resource">project.task</field>
+            <field name="export_fields" eval="[
+                (0, 0, {'name': 'obra_nr:string:ObraNr'}),
+                (0, 0, {'name': 'obra_docu_tip:string:ObraDocuTp'}),
+                (0, 0, {'name': 'obra_docu_nr:string:ObraDocuNr'}),
+                (0, 0, {'name': 'obra_docu_fc_renegociada:string:ObraDocuFcCheq'}),
+                (0, 0, {'name': 'obra_tipo_id/name:string:ObraDocuObraTpCd'}),
+                (0, 0, {'name': 'lnarti_id/name:string:ObraDocuLnArtiCd'}),
+                (0, 0, {'name': 'color_id/name:string:ObraDocuColoCd'}),
+                (0, 0, {'name': 'obra_docu_indi_kg:string:ObraDocuIndiKg'}),
+                (0, 0, {'name': 'obra_docu_cla_comp:string:ObraDocuIndiCmpl'}),
+                (0, 0, {'name': 'obra_docu_estd_id/name:string:ObraDocuEstdCd'}),
+                (0, 0, {'name': 'obra_docu_indi_vol:string:ObraDocuIndiVol'}),
+                (0, 0, {'name': 'obra_docu_fem:string:ObraDocuFcEm'}),
+                (0, 0, {'name': 'obra_docu_fc_cmpr_colo:string:ObraDocuFcCmprColo'}),
+                (0, 0, {'name': 'obra_docu_indi_otro4:string:ObraDocuIndiOtro4'}),
+                (0, 0, {'name': 'obra_docu_vano_libr_cn:string:ObraDocuVanoLibrCn'}),
+                (0, 0, {'name': 'dias_renegociados:string:DiasRenegiciados'}),
+                (0, 0, {'name': 'dias_para_entrega:string:DiasParaLaEntrega'}),
+                (0, 0, {'name': 'monto_total_etapa:string:MontoTotalEtapa'}),
+                (0, 0, {'name': 'ml_producto_terminado:string:ML_PRODUCTO_TERMINADO'}),
+                (0, 0, {'name': 'm2_producto_terminado:string:M2_PRODUCTO_TERMINADO'}),
+                (0, 0, {'name': 'm3_producto_terminado:string:M3_PRODUCTO_TERMINADO'}),
+                (0, 0, {'name': 'ratio_fabricacion:string:RATIO_DE_FABRICACION'}),
+                (0, 0, {'name': 'ratio_colocacion:string:RATIO_DE_COLOCACION'}),
+                (0, 0, {'name': 'tiempo_medicion_obra:string:TiempoDeMEDICIONDEOBRA'}),
+                (0, 0, {'name': 'tiempo_armado_ot:string:TiempoDeARMADODEOT'}),
+                (0, 0, {'name': 'tiempo_corte:string:TiempoDeCORTE'}),
+                (0, 0, {'name': 'tiempo_fabricacion:string:TiempoDeFABRICACION'}),
+                (0, 0, {'name': 'tiempo_acarreo_materiales:string:TiempoDeACARREODEMATERIALES'}),
+                (0, 0, {'name': 'tiempo_insumos:string:TiempoDeINSUMOS'}),
+                (0, 0, {'name': 'vendedor_id/name:string:VendedorACargo'}),
+                (0, 0, {'name': 'jefe_obra_id/name:string:JefeDeObraACargo'}),
+                (0, 0, {'name': 'tecnico_id/name:string:TecnicoACargo'}),
+                (0, 0, {'name': 'capataz_id/name:string:CapatazACargo'})
+            ]"/>
+        </record>
+
+    </data>
+</odoo>

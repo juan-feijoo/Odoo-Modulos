@@ -253,7 +253,7 @@ class ProjectTask(models.Model):
         compute='_compute_dias_para_entrega'
     )
 
-    insumo_line_ids = fields.One2many(
+    task_line_ids = fields.One2many(
         'project.task.line',
         'task_id',
         string="Insumos Utilizados"
