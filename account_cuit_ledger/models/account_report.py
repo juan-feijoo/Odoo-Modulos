@@ -9,7 +9,6 @@ _logger = logging.getLogger(__name__)
 class AccountReport(models.Model):
     _inherit = 'account.report'
 
-    # ... (los métodos _find_consumidor_final_id y _add_cuit_to_report_lines no cambian) ...
     def _find_consumidor_final_id(self):
         try:
             resp_type = self.env.ref('l10n_ar.res_afip_responsibility_type_5')
@@ -60,9 +59,7 @@ class AccountReport(models.Model):
         return lines
 
     def _get_lines(self, *args, **kwargs):
-        """
-        Solo agrega el CUIT a las líneas, sin modificar el colapsado/desplegado.
-        """
+  
         lines = super()._get_lines(*args, **kwargs)
         lines_with_cuit = self._add_cuit_to_report_lines(lines)
         return lines_with_cuit
