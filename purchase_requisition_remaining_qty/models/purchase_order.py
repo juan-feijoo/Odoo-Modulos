@@ -1,40 +1,56 @@
-# purchase_requisition_remaining_qty/models/purchase_order.py
 # -*- coding: utf-8 -*-
-from odoo import models, api
+from odoo import models, api, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
-import logging
-
-_logger = logging.getLogger(__name__)
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
+    def _check_requisition_status(self):
+        for order in self:
+            if order.requisition_id and order.requisition_id._is_fully_ordered():
+                raise UserError(_(
+                    "La operación no puede continuar porque el acuerdo de origen '%s' ya ha sido comprado en su totalidad."
+                ) % (order.requisition_id.name,))
+
     @api.model_create_multi
     def create(self, vals_list):
-        _logger.info("MÉTODO CREATE INTERCEPTADO. Verificando %d órdenes.", len(vals_list))
-        
-        for vals in vals_list:
-            if vals.get('origin'):
-                origin_name = vals.get('origin')
-                
-                requisition = self.env['purchase.requisition'].search([('name', '=', origin_name)], limit=1)
-                if requisition:
-                    _logger.info("Orden vinculada al requerimiento %s a través del campo 'origin'. Iniciando validación.", requisition.name)
-                    
-                    all_lines_completed = all(
-                        float_compare(line.qty_ordered, line.product_qty, precision_rounding=line.product_uom_id.rounding) >= 0
-                        for line in requisition.line_ids
-                    )
-                    
-                    if all_lines_completed:
-                        _logger.warning("BLOQUEADO: Intento de crear OC para requerimiento %s que ya está completado.", requisition.name)
-                        raise UserError(
-                            ("No se puede crear una nueva orden de compra porque el requerimiento "
-                             "de origen (%s) ya ha sido comprado en su totalidad.") % (requisition.name)
-                        )
-                    else:
-                        _logger.info("OK: El requerimiento %s no estaba completo. Se permite la creación.", requisition.name)
+        orders = super(PurchaseOrder, self).create(vals_list)
+        try:
+            orders._check_requisition_status()
+        except UserError:
+            raise
+        return orders
 
-        # Si todas las validaciones pasan, se crean las órdenes.
-        return super(PurchaseOrder, self).create(vals_list)
+    def button_confirm(self):
+        self._check_requisition_status()
+        for order in self:
+            if not order.requisition_id:
+                continue
+            for line in order.order_line:
+                pr_line = order.requisition_id.line_ids.filtered(
+                    lambda l: l.product_id == line.product_id
+                )
+                if not pr_line:
+                    continue
+                pr_line = pr_line[0]
+                remaining_qty_before_confirm = pr_line.product_qty - pr_line.qty_ordered
+                if float_compare(line.product_qty, remaining_qty_before_confirm, precision_rounding=line.product_uom.rounding) > 0:
+                    raise UserError(_(
+                        "La cantidad para el producto '%(product)s' excede la cantidad restante del acuerdo '%(requisition)s' (restante: %(qty_remaining)s)."
+                    ) % {
+                        'product': line.product_id.display_name,
+                        'requisition': pr_line.requisition_id.name,
+                        'qty_remaining': remaining_qty_before_confirm,
+                    })
+        res = super(PurchaseOrder, self).button_confirm()
+        for order in self:
+            if order.requisition_id and order.requisition_id._is_fully_ordered():
+                return {
+                    'effect': {
+                        'fadeout': 'slow',
+                        'message': _("¡Excelente! Has completado todas las compras para el requerimiento %s.") % (order.requisition_id.name,),
+                        'type': 'rainbow_man',
+                    }
+                }
+        return res
