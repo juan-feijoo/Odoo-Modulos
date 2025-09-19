@@ -16,7 +16,6 @@
         "odoo-mod-parche-stock_picking_grouping",
     ],
     'data': [
-         'views/stock_move_line_views.xml',
     ],
     'installable': True,
     'application': False,
