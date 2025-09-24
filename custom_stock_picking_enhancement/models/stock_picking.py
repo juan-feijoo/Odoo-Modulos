@@ -6,21 +6,20 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     def _get_root_origin(self, picking, visited=None):
+        """
+        Función recursiva para encontrar el documento de origen raíz.
+        """
         if visited is None:
             visited = set()
         if not picking.origin or picking.name in visited:
             return picking.origin or picking.name
 
         visited.add(picking.name)
-
-        # Buscamos si el origen es otro remito
         parent_picking = self.env['stock.picking'].search([('name', '=', picking.origin)], limit=1)
         
         if parent_picking:
-            # Si encontramos un remito padre, seguimos buscando desde allí
             return self._get_root_origin(parent_picking, visited)
         else:
-            # Si no hay remito padre, hemos encontrado el origen raíz (ej. 'S00045')
             return picking.origin
 
     def action_combine_pickings(self):
@@ -36,9 +35,7 @@ class StockPicking(models.Model):
             raise UserError(_("No se pueden combinar remitos de diferentes propietarios."))
         if len(pickings.mapped('partner_id')) > 1:
             raise UserError(_("No se pueden combinar remitos de diferentes clientes."))
-        if len(pickings.mapped('location_dest_id')) > 1:
-            raise UserError(_("Los remitos deben tener la misma Ubicación de Destino."))
-
+        
         # --- LÓGICA DE UBICACIONES Y TIPO DE OPERACIÓN ---
         first_picking = pickings[0]
         owner_id = first_picking.owner_id
@@ -55,23 +52,24 @@ class StockPicking(models.Model):
         default_source_location = outgoing_picking_type.default_location_src_id
         if not default_source_location:
             raise UserError(_("El tipo de operación '%s' no tiene una Ubicación de Origen por Defecto configurada.", outgoing_picking_type.name))
+        
+        default_dest_location = outgoing_picking_type.default_location_dest_id
+        if not default_dest_location:
+            raise UserError(_("El tipo de operación '%s' no tiene una Ubicación de Destino por Defecto configurada.", outgoing_picking_type.name))
 
         # --- BÚSQUEDA DE ORÍGENES RAÍZ ---
-        # Usamos un diccionario para calcular el origen raíz una sola vez por remito
-        picking_to_root_origin_map = {
-            p.id: self._get_root_origin(p) for p in pickings
-        }
-        
+        picking_to_root_origin_map = {p.id: self._get_root_origin(p) for p in pickings}
         unique_root_origins = set(picking_to_root_origin_map.values())
         new_picking_origin = ', '.join(sorted(list(o for o in unique_root_origins if o)))
-        
         if not new_picking_origin:
             new_picking_origin = ', '.join(pickings.mapped('name'))
         
         # --- CREACIÓN DEL NUEVO REMITO ---
         picking_vals = {
-            'picking_type_id': outgoing_picking_type.id, 'location_id': default_source_location.id,
-            'location_dest_id': first_picking.location_dest_id.id, 'origin': new_picking_origin,
+            'picking_type_id': outgoing_picking_type.id,
+            'location_id': default_source_location.id,
+            'location_dest_id': default_dest_location.id,
+            'origin': new_picking_origin,
             'partner_id': first_picking.partner_id.id if first_picking.partner_id else False,
             'owner_id': owner_id.id if owner_id else False,
         }
@@ -92,7 +90,7 @@ class StockPicking(models.Model):
                         'name': product.display_name, 'product_id': product.id,
                         'product_uom': line.product_uom_id.id, 'product_uom_qty': 0,
                         'location_id': default_source_location.id,
-                        'location_dest_id': new_picking.location_dest_id.id,
+                        'location_dest_id': new_picking.location_dest_id.id, # Correcto, hereda del nuevo picking
                         'picking_id': new_picking.id,
                         'restrict_partner_id': owner_id.id if owner_id else False,
                         'origin': root_origin_for_this_picking or picking.name,
@@ -102,8 +100,8 @@ class StockPicking(models.Model):
                 self.env['stock.move.line'].create({
                     'picking_id': new_picking.id, 'move_id': move.id, 'product_id': product.id,
                     'product_uom_id': line.product_uom_id.id, 'qty_done': line.qty_done,
-                    'location_id': line.location_id.id,
-                    'location_dest_id': new_picking.location_dest_id.id,
+                    'location_id': default_source_location.id, # La ubicación de donde se RECOGE el stock
+                    'location_dest_id': new_picking.location_dest_id.id, # El destino final del nuevo remito
                     'lot_id': line.lot_id.id,
                     'origin': root_origin_for_this_picking or picking.name,
                     'owner_id': owner_id.id if owner_id else False,
