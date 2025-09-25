@@ -53,10 +53,9 @@ class StockPicking(models.Model):
         if not default_source_location:
             raise UserError(_("El tipo de operación '%s' no tiene una Ubicación de Origen por Defecto configurada.", outgoing_picking_type.name))
         
-        default_dest_location = outgoing_picking_type.default_location_dest_id
-        if not default_dest_location:
-            raise UserError(_("El tipo de operación '%s' no tiene una Ubicación de Destino por Defecto configurada.", outgoing_picking_type.name))
-
+        # El destino es la ubicación del cliente, que es estándar para salidas
+        customer_location = self.env.ref('stock.stock_location_customers')
+        
         # --- BÚSQUEDA DE ORÍGENES RAÍZ ---
         picking_to_root_origin_map = {p.id: self._get_root_origin(p) for p in pickings}
         unique_root_origins = set(picking_to_root_origin_map.values())
@@ -68,7 +67,7 @@ class StockPicking(models.Model):
         picking_vals = {
             'picking_type_id': outgoing_picking_type.id,
             'location_id': default_source_location.id,
-            'location_dest_id': default_dest_location.id,
+            'location_dest_id': customer_location.id, # Usamos la ubicación de clientes
             'origin': new_picking_origin,
             'partner_id': first_picking.partner_id.id if first_picking.partner_id else False,
             'owner_id': owner_id.id if owner_id else False,
@@ -90,7 +89,7 @@ class StockPicking(models.Model):
                         'name': product.display_name, 'product_id': product.id,
                         'product_uom': line.product_uom_id.id, 'product_uom_qty': 0,
                         'location_id': default_source_location.id,
-                        'location_dest_id': new_picking.location_dest_id.id, # Correcto, hereda del nuevo picking
+                        'location_dest_id': new_picking.location_dest_id.id,
                         'picking_id': new_picking.id,
                         'restrict_partner_id': owner_id.id if owner_id else False,
                         'origin': root_origin_for_this_picking or picking.name,
@@ -98,13 +97,17 @@ class StockPicking(models.Model):
                     new_moves_by_product[product.id] = move
                 
                 self.env['stock.move.line'].create({
-                    'picking_id': new_picking.id, 'move_id': move.id, 'product_id': product.id,
-                    'product_uom_id': line.product_uom_id.id, 'qty_done': line.qty_done,
-                    'location_id': default_source_location.id, # La ubicación de donde se RECOGE el stock
-                    'location_dest_id': new_picking.location_dest_id.id, # El destino final del nuevo remito
-                    'lot_id': line.lot_id.id,
+                    'picking_id': new_picking.id,
+                    'move_id': move.id,
+                    'product_id': product.id,
+                    'product_uom_id': line.product_uom_id.id,
+                    'qty_done': line.qty_done,
+                    'location_id': default_source_location.id,
+                    'location_dest_id': new_picking.location_dest_id.id,
+                    'lot_id': line.lot_id.id if line.lot_id else False,
                     'origin': root_origin_for_this_picking or picking.name,
                     'owner_id': owner_id.id if owner_id else False,
+                    'package_id': line.result_package_id.id if line.result_package_id else False,
                 })
 
         for move in new_moves_by_product.values():
@@ -113,8 +116,15 @@ class StockPicking(models.Model):
             total_qty = sum(l.qty_done for l in move.move_line_ids)
             move.write({'product_uom_qty': total_qty})
         
+        # Confirmamos y chequeamos disponibilidad para que el remito quede listo para validar
+        new_picking.action_confirm()
+        new_picking.action_assign()
+        
         return {
-            'name': _('Remito Combinado (Mejorado)'), 'type': 'ir.actions.act_window',
-            'view_mode': 'form', 'res_model': 'stock.picking', 'res_id': new_picking.id,
+            'name': _('Remito Combinado'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'stock.picking',
+            'res_id': new_picking.id,
             'target': 'current',
         }
