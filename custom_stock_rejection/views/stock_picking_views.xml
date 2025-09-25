@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_picking_form_inherit_rejection" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherit.rejection</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@name='action_cancel']" position="before">
+                    <button name="action_reject"
+                            string="Rechazar"
+                            type="object"
+                            class="btn-danger"
+                            confirm="¿Estás seguro de que deseas rechazar esta recepción? Esta acción no se puede deshacer y cancelará los movimientos de inventario asociados."
+                            invisible="state in ('done', 'cancel', 'rejected') or picking_type_code != 'incoming'"/>
+                </xpath>
+
+                <xpath expr="//field[@name='state']" position="attributes">
+                    <attribute name="statusbar_visible">draft,waiting,confirmed,assigned,done,rejected</attribute>
+                </xpath>
+
+            </field>
+        </record>
+    </data>
+</odoo>
