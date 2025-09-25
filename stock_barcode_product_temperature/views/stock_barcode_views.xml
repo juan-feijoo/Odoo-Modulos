@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_move_line_barcode_selector_inherit_temperature" model="ir.ui.view">
+        <field name="name">stock.move.line.barcode.selector.inherit.temperature</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock_barcode.stock_move_line_product_selector"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='tracking_number']" position="after">
+                <div class="row">
+                    <div class="text-black-50 mt-2 fs-5">
+                        <span class="fa fa-thermometer-half me-1"/>
+                        <label for="temperatura" string="Temperatura" class="p-0"/>
+                    </div>
+                    <div>
+                        <field name="temperatura" force_save="1"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
