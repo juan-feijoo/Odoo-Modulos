@@ -5,23 +5,6 @@ from odoo.exceptions import UserError
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    def _get_root_origin(self, picking, visited=None):
-        """
-        Función recursiva para encontrar el documento de origen raíz.
-        """
-        if visited is None:
-            visited = set()
-        if not picking.origin or picking.name in visited:
-            return picking.origin or picking.name
-
-        visited.add(picking.name)
-        parent_picking = self.env['stock.picking'].search([('name', '=', picking.origin)], limit=1)
-        
-        if parent_picking:
-            return self._get_root_origin(parent_picking, visited)
-        else:
-            return picking.origin
-
     def action_combine_pickings(self):
         pickings = self
         if not pickings:
@@ -53,13 +36,12 @@ class StockPicking(models.Model):
         if not default_source_location:
             raise UserError(_("El tipo de operación '%s' no tiene una Ubicación de Origen por Defecto configurada.", outgoing_picking_type.name))
         
-        # El destino es la ubicación del cliente, que es estándar para salidas
         customer_location = self.env.ref('stock.stock_location_customers')
-        
-        # --- BÚSQUEDA DE ORÍGENES RAÍZ ---
-        picking_to_root_origin_map = {p.id: self._get_root_origin(p) for p in pickings}
-        unique_root_origins = set(picking_to_root_origin_map.values())
-        new_picking_origin = ', '.join(sorted(list(o for o in unique_root_origins if o)))
+
+        # --- LÓGICA DE ORÍGENES PARA EL REMITO PRINCIPAL ---
+        all_origins = pickings.mapped('origin')
+        unique_origins = sorted(list(set(o for o in all_origins if o)))
+        new_picking_origin = ', '.join(unique_origins)
         if not new_picking_origin:
             new_picking_origin = ', '.join(pickings.mapped('name'))
         
@@ -67,24 +49,23 @@ class StockPicking(models.Model):
         picking_vals = {
             'picking_type_id': outgoing_picking_type.id,
             'location_id': default_source_location.id,
-            'location_dest_id': customer_location.id, # Usamos la ubicación de clientes
+            'location_dest_id': customer_location.id,
             'origin': new_picking_origin,
             'partner_id': first_picking.partner_id.id if first_picking.partner_id else False,
             'owner_id': owner_id.id if owner_id else False,
         }
         new_picking = self.env['stock.picking'].create(picking_vals)
 
-        # --- CREACIÓN DE LÍNEAS DE MOVIMIENTO ---
-        new_moves_by_product = {}
+        new_moves_data = {}
         for picking in pickings:
-            root_origin_for_this_picking = picking_to_root_origin_map.get(picking.id)
             for line in picking.move_line_ids:
                 if line.qty_done <= 0:
                     continue
                 
                 product = line.product_id
-                move = new_moves_by_product.get(product.id)
-                if not move:
+                product_data = new_moves_data.get(product.id)
+                
+                if not product_data:
                     move = self.env['stock.move'].create({
                         'name': product.display_name, 'product_id': product.id,
                         'product_uom': line.product_uom_id.id, 'product_uom_qty': 0,
@@ -92,39 +73,41 @@ class StockPicking(models.Model):
                         'location_dest_id': new_picking.location_dest_id.id,
                         'picking_id': new_picking.id,
                         'restrict_partner_id': owner_id.id if owner_id else False,
-                        'origin': root_origin_for_this_picking or picking.name,
                     })
-                    new_moves_by_product[product.id] = move
+                    product_data = {'move': move, 'origins': set()}
+                    new_moves_data[product.id] = product_data
                 
+                if picking.origin:
+                    product_data['origins'].add(picking.origin)
+
                 self.env['stock.move.line'].create({
                     'picking_id': new_picking.id,
-                    'move_id': move.id,
+                    'move_id': product_data['move'].id,
                     'product_id': product.id,
                     'product_uom_id': line.product_uom_id.id,
                     'qty_done': line.qty_done,
                     'location_id': default_source_location.id,
                     'location_dest_id': new_picking.location_dest_id.id,
                     'lot_id': line.lot_id.id if line.lot_id else False,
-                    'origin': root_origin_for_this_picking or picking.name,
                     'owner_id': owner_id.id if owner_id else False,
                     'package_id': line.result_package_id.id if line.result_package_id else False,
                 })
 
-        for move in new_moves_by_product.values():
-            origins = [l.origin for l in move.move_line_ids if l.origin and l.product_id == move.product_id]
-            move.origin = ', '.join(sorted(list(set(origins))))
+
+        for data in new_moves_data.values():
+            move = data['move']
+            move_origin = ', '.join(sorted(list(data['origins'])))
             total_qty = sum(l.qty_done for l in move.move_line_ids)
-            move.write({'product_uom_qty': total_qty})
+            move.write({
+                'origin': move_origin,
+                'product_uom_qty': total_qty
+            })
         
-        # Confirmamos y chequeamos disponibilidad para que el remito quede listo para validar
         new_picking.action_confirm()
         new_picking.action_assign()
         
         return {
-            'name': _('Remito Combinado'),
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'stock.picking',
-            'res_id': new_picking.id,
+            'name': _('Remito Combinado'), 'type': 'ir.actions.act_window',
+            'view_mode': 'form', 'res_model': 'stock.picking', 'res_id': new_picking.id,
             'target': 'current',
         }
