@@ -7,7 +7,7 @@
         real del libro mayor, incluyendo operaciones misceláneas.
     """,
     'description': """
-        Este módulo modifica el comportamiento del tablero de contabilidad
+        Este módulo modifica el comportamiento del tablero de contabilidad (account_dashboard)
         para que el balance principal refleje el total de la cuenta contable asociada al diario,
         en lugar de excluir los asientos manuales.
     """,
