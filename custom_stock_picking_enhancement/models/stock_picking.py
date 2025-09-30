@@ -2,20 +2,16 @@
 from odoo import models, api, _
 from odoo.exceptions import UserError
 
+
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     def action_combine_pickings(self):
         pickings = self
-        if not pickings:
-            raise UserError(_("Debe seleccionar al menos un remito para combinar."))
         if any(p.state != 'done' for p in pickings):
             raise UserError(_("Solo se pueden combinar remitos que estén en estado 'Hecho'."))
 
         # --- VALIDACIONES ---
-        owners = pickings.mapped('owner_id')
-        if len(owners) > 1:
-            raise UserError(_("No se pueden combinar remitos de diferentes propietarios."))
         if len(pickings.mapped('partner_id')) > 1:
             raise UserError(_("No se pueden combinar remitos de diferentes clientes."))
         
@@ -38,14 +34,12 @@ class StockPicking(models.Model):
         
         customer_location = self.env.ref('stock.stock_location_customers')
 
-        # --- LÓGICA DE ORÍGENES PARA EL REMITO PRINCIPAL ---
+        # --- LÓGICA DE ORÍGENES  ---
         all_origins = pickings.mapped('origin')
         unique_origins = sorted(list(set(o for o in all_origins if o)))
-        new_picking_origin = ', '.join(unique_origins)
-        if not new_picking_origin:
-            new_picking_origin = ', '.join(pickings.mapped('name'))
+        new_picking_origin = ', '.join(unique_origins) or ', '.join(pickings.mapped('name'))
         
-        # --- CREACIÓN DEL NUEVO REMITO ---
+        # --- CREACIÓN DEL NUEVO REMITO  ---
         picking_vals = {
             'picking_type_id': outgoing_picking_type.id,
             'location_id': default_source_location.id,
@@ -56,55 +50,64 @@ class StockPicking(models.Model):
         }
         new_picking = self.env['stock.picking'].create(picking_vals)
 
-        new_moves_data = {}
+        product_data_map = {}
         for picking in pickings:
-            for line in picking.move_line_ids:
-                if line.qty_done <= 0:
-                    continue
-                
+            for line in picking.move_line_ids.filtered(lambda l: l.qty_done > 0):
                 product = line.product_id
-                product_data = new_moves_data.get(product.id)
                 
-                if not product_data:
-                    move = self.env['stock.move'].create({
-                        'name': product.display_name, 'product_id': product.id,
-                        'product_uom': line.product_uom_id.id, 'product_uom_qty': 0,
-                        'location_id': default_source_location.id,
-                        'location_dest_id': new_picking.location_dest_id.id,
-                        'picking_id': new_picking.id,
-                        'restrict_partner_id': owner_id.id if owner_id else False,
-                    })
-                    product_data = {'move': move, 'origins': set()}
-                    new_moves_data[product.id] = product_data
+                # Inicializar el diccionario para este producto si es la primera vez que lo vemos
+                product_data_map.setdefault(product, {
+                    'total_quantity': 0.0,
+                    'origins': set(),
+                    'lines_details': [],
+                    'uom_id': line.product_uom_id
+                })
                 
+                # Acumular la cantidad total
+                product_data_map[product]['total_quantity'] += line.qty_done
+                
+                # Agregar el origen
                 if picking.origin:
-                    product_data['origins'].add(picking.origin)
+                    product_data_map[product]['origins'].add(picking.origin)
+                
+                product_data_map[product]['lines_details'].append({
+                    'quantity': line.qty_done,
+                    'lot_id': line.lot_id,
+                    'package_id': line.result_package_id,
+                })
+        
+        for product, data in product_data_map.items():
+            move_origin = ', '.join(sorted(list(data['origins'])))
+            move = self.env['stock.move'].create({
+                'name': product.display_name,
+                'product_id': product.id,
+                'product_uom': data['uom_id'].id,
+                'product_uom_qty': data['total_quantity'], # <-- ¡CLAVE! Se crea con la cantidad total
+                'location_id': default_source_location.id,
+                'location_dest_id': new_picking.location_dest_id.id,
+                'picking_id': new_picking.id,
+                'origin': move_origin,
+                'restrict_partner_id': owner_id.id if owner_id else False,
+            })
 
+            for line_detail in data['lines_details']:
                 self.env['stock.move.line'].create({
                     'picking_id': new_picking.id,
-                    'move_id': product_data['move'].id,
+                    'move_id': move.id,
                     'product_id': product.id,
-                    'product_uom_id': line.product_uom_id.id,
-                    'qty_done': line.qty_done,
+                    'product_uom_id': data['uom_id'].id,
+                    'quantity': line_detail['quantity'],
+                    'qty_done': 0,
                     'location_id': default_source_location.id,
                     'location_dest_id': new_picking.location_dest_id.id,
-                    'lot_id': line.lot_id.id if line.lot_id else False,
+                    'lot_id': line_detail['lot_id'].id if line_detail['lot_id'] else False,
                     'owner_id': owner_id.id if owner_id else False,
-                    'package_id': line.result_package_id.id if line.result_package_id else False,
+                    'package_id': line_detail['package_id'].id if line_detail['package_id'] else False,
                 })
 
-
-        for data in new_moves_data.values():
-            move = data['move']
-            move_origin = ', '.join(sorted(list(data['origins'])))
-            total_qty = sum(l.qty_done for l in move.move_line_ids)
-            move.write({
-                'origin': move_origin,
-                'product_uom_qty': total_qty
-            })
-        
-        new_picking.action_confirm()
-        new_picking.action_assign()
+        #Lineas comentadas para dejar en borrador
+        #new_picking.action_confirm()
+        #new_picking.action_assign()
         
         return {
             'name': _('Remito Combinado'), 'type': 'ir.actions.act_window',
