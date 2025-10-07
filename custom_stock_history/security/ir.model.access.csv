@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read
+access_daily_stock_history_user,daily.stock.history user,model_daily_stock_history,base.group_user,1

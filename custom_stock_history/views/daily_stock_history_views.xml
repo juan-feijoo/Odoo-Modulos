@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vista de Lista (Tree View) -->
+    <record id="view_daily_stock_history_tree" model="ir.ui.view">
+        <field name="name">daily.stock.history.tree</field>
+        <field name="model">daily.stock.history</field>
+        <field name="arch" type="xml">
+            <tree string="Histórico Diario por Ubicación" create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="product_id"/>
+                <field name="category_id"/>
+                <field name="uom_id" string="UdM"/>
+                <field name="income" sum="Total Ingresos"/>
+                <field name="outcome" sum="Total Salidas"/>
+                <field name="balance" sum="Balance Total"/>
+                <!-- El campo acumulado no se suma porque es un saldo -->
+                <field name="accumulated"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Acción de Ventana (lo que abre la vista) -->
+    <record id="action_daily_stock_history" model="ir.actions.act_window">
+        <field name="name">Histórico Diario por Ubicación</field>
+        <field name="res_model">daily.stock.history</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_daily_stock_history_tree"/>
+        <field name="context">{'group_by': ['location_id', 'product_id']}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No se encontraron movimientos.
+            </p><p>
+                Este informe muestra el historial de movimientos de stock agregados por día,
+                con un saldo acumulado para facilitar el seguimiento.
+            </p>
+        </field>
+    </record>
+
+    <!-- Elemento del Menú -->
+    <menuitem
+        id="menu_daily_stock_history"
+        name="Histórico Diario"
+        parent="stock.menu_warehouse_report"
+        action="action_daily_stock_history"
+        sequence="100"/>
+
+</odoo> 
