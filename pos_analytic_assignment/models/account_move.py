@@ -12,16 +12,13 @@ class AccountMove(models.Model):
         moves = super().create(vals_list)
         _logger.info("Módulo Analítico: Se crearon asientos con IDs %s. Verificando...", moves.ids)
 
-
         for move in moves:
-
             journal = move.journal_id
             analytic_account = journal.analytic_account_id
             
             if journal.type == 'sale' and analytic_account:
                 _logger.info("Asiento %s usa el diario de ventas '%s' que tiene la cuenta analítica '%s'. Aplicando...", move.name, journal.name, analytic_account.name)
                 
-
                 for line in move.line_ids:
                     if not line.analytic_distribution:
                         _logger.info("-> Asignando a la línea '%s' (Cuenta: %s)", line.name, line.account_id.code)
