@@ -5,12 +5,11 @@
         <field name="model">sale.report</field>
         <field name="inherit_id" ref="sale.sale_report_view_tree"/>        
         <field name="arch" type="xml">
-            <!-- 1. Hacemos invisible el campo original 'invoice_status'. -->
+
             <xpath expr="//field[@name='invoice_status']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
 
-            <!-- 2. Añadimos nuestro nuevo campo calculado justo después del original. -->
             <xpath expr="//field[@name='invoice_status']" position="after">
                 <field name="invoice_status_computed"/>
             </xpath>
