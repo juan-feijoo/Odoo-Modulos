@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_picking_form_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <!-- 1. Agregamos el campo booleano para elegir -->
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="use_preprinted_remito" invisible="picking_type_code != 'outgoing'"/>
+                </xpath>
+                <xpath expr="//field[@name='location_id']" position="after">
+                    <label for="name_nro_remito" string="Nro Remito Pre-impreso" 
+                           invisible="not use_preprinted_remito or picking_type_code != 'outgoing'"/>
+                    <div invisible="not use_preprinted_remito or picking_type_code != 'outgoing'">
+                        <field name="name_nro_remito" readonly="True" class="oe_inline" style="padding-right:15px"/>
+                        <button name="action_open_update_sequence_wizard" type="object" string="Corregir número" class="btn-secondary ml-4" style="margin-left:5px !important;"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_update_tropa_sequence_wizard_form" model="ir.ui.view">
+            <field name="name">update.remito.sequence.wizard.form</field>
+            <field name="model">update.remito.sequence.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Actualizar Número de Secuencia">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="current_number" readonly="1"/>
+                                <field name="new_number"/>
+                            </group>
+                        </group>
+                        <footer>
+                            <button name="action_confirm" string="Confirmar" type="object" class="btn-primary"/>
+                            <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,38 @@
+<odoo>
+    <data noupdate="1"> <!-- noupdate="1" para evitar que se reinicien al actualizar el módulo -->
+
+        <!-- Secuencia para la Compañía Principal -->
+        <record id="seq_remito_main_company" model="ir.sequence">
+            <field name="name">Secuencia Remito Pre-impreso C1</field>
+            <field name="code">stock.picking.remito</field>
+            <field name="prefix">0002-</field> <!-- Prefijo para Compañía 1 -->
+            <field name="padding">8</field>
+            <field name="use_date_range">False</field>
+            <field name="number_next_actual">1</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <!-- Secuencia para la Segunda Compañía (ID=2) -->
+        <!-- 
+            IMPORTANTE: Necesitas el ID externo de tu segunda compañía.
+            Para encontrarlo, ve a Ajustes > Técnico > Secuencias e Identificadores > Identificadores Externos.
+            Busca el modelo 'res.company' y encuentra el ID de tu segunda compañía.
+            Si no existe, puedes crearlo.
+            Una forma segura es crear la segunda secuencia manualmente desde la UI la primera vez.
+            
+            Aquí usaremos un truco para vincularla si conocemos su ID.
+            Si tu segunda compañía tiene el ID 2, este XML funcionará.
+        -->
+        <record id="seq_remito_second_company" model="ir.sequence">
+            <field name="name">Secuencia Remito Pre-impreso C2</field>
+            <field name="code">stock.picking.remito</field>
+            <field name="prefix">0001-</field> <!-- Prefijo para Compañía 2 -->
+            <field name="padding">8</field>
+            <field name="use_date_range">False</field>
+            <field name="number_next_actual">1</field>
+            <!-- Vinculamos a la compañía con ID 2 -->
+            <field name="company_id" eval="2"/>
+        </record>
+
+    </data>
+</odoo>
