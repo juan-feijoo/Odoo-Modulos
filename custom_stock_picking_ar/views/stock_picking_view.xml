@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_picking_form_inherit_custom_ar" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherit.ar</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Información de Despacho" name="dispatch_info_ar_page">
+                        <group>
+                            <!-- Grupo para Transporte y Chofer -->
+                            <group string="Transporte y Chofer">
+                                <field name="transport_id"/>
+                                <field name="transport_vat"/>
+                                <field name="transport_address"/>
+                                <field name="driver_name" readonly="state in ('done', 'cancel')"/>
+                                <field name="driver_dni" readonly="state in ('done', 'cancel')"/>
+                                <field name="vehicle_license_plate" readonly="state in ('done', 'cancel')"/>
+                                <field name="trailer_license_plate" readonly="state in ('done', 'cancel')"/>
+                            </group>
+
+                            <!-- Grupo para Aduana e Importador -->
+                            <group string="Aduana e Importador">
+                                <field name="customs_broker_id"/>
+                                <field name="customs_broker_vat"/>
+                                <field name="customs_broker_address"/>
+                                <field name="importer_id"/>
+                                <field name="importer_address"/>
+                            </group>
+                        </group>
+                        <group string="Datos de Exportación y Origen">
+                            <field name="sale_order_id"/>
+                            <field name="commercial_invoice_id"/>
+                            <field name="final_destination_country"/>
+                            <field name="origin_goods_display"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
