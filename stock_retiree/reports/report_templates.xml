@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Modificación del Albarán de Entrega (Delivery Slip) -->
+    <template id="report_delivery_document_inherit_retirado" inherit_id="stock.report_delivery_document">
+        <!-- El div con id="informations" ya no existe en Odoo 17.
+             Usamos el div que contiene la dirección del cliente (name="partner_header") como referencia. -->
+        <xpath expr="//div[@name='partner_header']" position="after">
+            <div t-if="o.x_retirado_por_id" class="col-6" name="retirado_por_info">
+                <strong>Retirado por:</strong>
+                <p class="m-0" t-field="o.x_retirado_por_id.name"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>
