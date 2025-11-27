@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_journal_form_inherit_unofficial" model="ir.ui.view">
+        <field name="name">account.journal.form.inherit.unofficial</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <field name="type" position="after">
+                <field name="is_unofficial_journal"/>
+            </field>
+        </field>
+    </record>
+</odoo>
