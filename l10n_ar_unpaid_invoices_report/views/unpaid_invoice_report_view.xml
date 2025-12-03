@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista del Formulario del Wizard -->
+    <record id="view_unpaid_invoice_report_wizard_form" model="ir.ui.view">
+        <field name="name">unpaid.invoice.report.wizard.form</field>
+        <field name="model">unpaid.invoice.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reporte de Facturas Impagas">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                </group>
+                
+                <!-- Sección de descarga: Solo visible si hay archivo -->
+                <div invisible="not excel_file">
+                    <hr/>
+                    <h3>¡Reporte Generado!</h3>
+                    <field name="file_name" invisible="1"/>
+                    <field name="excel_file" filename="file_name" widget="binary"/>
+                </div>
+
+                <footer>
+                    <!-- Botón Generar: Oculto si ya hay archivo -->
+                    <button name="action_generate_excel" string="Generar Excel" type="object" class="btn-primary" 
+                            invisible="excel_file"/>
+                    
+                    <!-- Botón Cerrar -->
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción de Ventana -->
+    <record id="action_unpaid_invoice_report" model="ir.actions.act_window">
+        <field name="name">Detalle de Facturas Impagas</field>
+        <field name="res_model">unpaid.invoice.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Elemento de Menú en Contabilidad > Reportes -->
+    <!-- 'account.menu_finance_reports' es el padre de los reportes genéricos -->
+    <!-- Si quieres que aparezca en "Reportes de Gestión", usa 'account.account_reports_management_menu' -->
+    <menuitem id="menu_unpaid_invoice_report"
+              name="Detalle Facturas Impagas (Excel)"
+              parent="account.menu_finance_reports"
+              action="action_unpaid_invoice_report"
+              sequence="100"/>
+</odoo>
