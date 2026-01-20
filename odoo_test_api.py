@@ -38,7 +38,7 @@ for linea in datos_entrada["invoice_line_ids"]:
         "name": linea["name"],
         "quantity": linea["quantity"],
         "price_unit": linea["price_unit"],
-        # Opcional: Si el diario es no fiscal, quizás quieras quitar impuestos
+        # Opcional: Si el diario es no fiscal
         # "tax_ids": [] 
     }))
 
@@ -55,24 +55,24 @@ factura_vals = {
 
 # --- ENVÍO A ODOO ---
 try:
-    print("🔌 Conectando...")
+    print("Conectando")
     common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
     uid = common.authenticate(db, username, api_key, {})
     models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
 
     if uid:
-        print(f"🚀 Creando factura en Diario ID {datos_entrada['journal_id']}...")
+        print(f" Creando factura en Diario ID {datos_entrada['journal_id']}...")
         
         invoice_id = models.execute_kw(db, uid, api_key, 'account.move', 'create', [factura_vals])
         
-        print(f"✅ ¡ÉXITO! Factura creada con ID: {invoice_id}")
+        print(f" Factura creada con ID: {invoice_id}")
     else:
-        print("❌ Error de autenticación.")
+        print(" Error de autenticación.")
 
 except xmlrpc.client.Fault as error:
-    print("\n❌ ERROR DE ODOO:")
+    print("\nERROR DE ODOO:")
     print(f"Código: {error.faultCode}")
     print(f"Mensaje: {error.faultString}")
     # Tip común: Si falla aquí con el diario 214, verifica que sea de tipo 'purchase'
 except Exception as e:
-    print(f"\n❌ ERROR DE PYTHON: {e}")
+    print(f"\nERROR DE PYTHON: {e}")
