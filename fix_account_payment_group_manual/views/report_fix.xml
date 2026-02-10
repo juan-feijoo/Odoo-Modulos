@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Heredamos del template original del módulo que me pasaste -->
+    <template id="fix_report_payment_document" 
+              inherit_id="account-payment-group.report_payment_with_withholdings_document">
+        <xpath expr="//span[@t-field='line.amount']" position="attributes">
+            <attribute name="t-options">{'widget': 'monetary', 'display_currency': line.currency_id or o.company_currency_id}</attribute>
+        </xpath>
+
+        <xpath expr="//table[@name='matching_table']/tfoot/tr/td[@class='text-right']/strong/span" position="attributes">
+             <attribute name="t-options">{'widget': 'monetary', 'display_currency': o.company_currency_id}</attribute>
+        </xpath>
+
+    </template>
+</odoo>
