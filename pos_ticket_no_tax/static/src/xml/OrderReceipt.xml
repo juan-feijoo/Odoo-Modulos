@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_ticket_no_tax.OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <!-- Add a class to the main receipt div to conditionally hide tax details via CSS -->
+        <xpath expr="//div[hasclass('pos-receipt')]" position="attributes">
+            <attribute name="t-att-class" separator=" ">{'no-iva-receipt': props.data.headerData.is_no_iva_receipt}</attribute>
+        </xpath>
+    </t>
+
+</templates>
