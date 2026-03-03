@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Formulario del Wizard -->
+    <record id="view_sale_report_wizard_form" model="ir.ui.view">
+        <field name="name">sale.report.wizard.form</field>
+        <field name="model">sale.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reporte de Ventas por Oportunidad">
+                <!-- Estado oculto para manejar la visibilidad -->
+                <field name="state" invisible="1"/>
+                
+                <!-- ESTAPA 1: Selección de Fechas -->
+                <group invisible="state == 'get'">
+                    <p class="text-muted" colspan="2">
+                        Seleccioná el rango de fechas. Se generará un Excel con todas las líneas de ventas 
+                        confirmadas que provengan de una oportunidad (Obra Ganada).
+                    </p>
+                    <group>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                    </group>
+                </group>
+
+                <!-- ETAPA 2: Descarga de Archivo -->
+                <group invisible="state == 'choose'">
+                    <field name="file_name" invisible="1"/>
+                    <field name="excel_file" filename="file_name" readonly="1" widget="binary" string="Descargar Reporte"/>
+                    <p class="text-success" colspan="2">
+                        ¡El reporte ha sido generado con éxito! Hacé clic en el archivo de arriba para descargarlo.
+                    </p>
+                </group>
+
+                <footer>
+                    <!-- Botón visible solo en etapa 1 -->
+                    <button name="action_generate_excel" string="Generar Excel" type="object" class="btn-primary" invisible="state == 'get'"/>
+                    
+                    <!-- Botón de descarte/cierre -->
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción de Ventana para invocar el Wizard -->
+    <record id="action_sale_report_wizard" model="ir.actions.act_window">
+        <field name="name">Obras Ganadas</field>
+        <field name="res_model">sale.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menú Item (Se ubicará en Ventas -> Reportes) -->
+    <menuitem id="menu_sale_report_wizard"
+              name="Obras Ganadas"
+              parent="sale.menu_sale_report"
+              action="action_sale_report_wizard"
+              sequence="150"/>
+</odoo>
