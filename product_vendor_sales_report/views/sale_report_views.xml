@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_product_search_inherit_vendor" model="ir.ui.view">
+        <field name="name">sale.report.search.inherit.vendor</field>
+        <field name="model">sale.report</field>
+        <field name="inherit_id" ref="sale.view_order_product_search"/>
+        <field name="arch" type="xml">
+            <!-- Apuntamos a la etiqueta <search> que SIEMPRE existe -->
+            <xpath expr="//search" position="inside">
+                <filter string="Proveedor Principal" name="group_by_main_vendor" context="{'group_by':'main_vendor_id'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

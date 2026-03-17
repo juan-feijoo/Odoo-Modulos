@@ -2,13 +2,11 @@
 <templates id="template" xml:space="preserve">
     <!-- Heredamos el ticket del POS -->
     <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
-        <!-- 
-             Buscamos cualquier lugar donde se imprima tax.name o tax.tax.name
-             y aplicamos el renombrado si contiene "impuesto interno"
-        -->
         <xpath expr="//t[@t-foreach='props.data.tax_details']//*[contains(@t-esc, 'tax.name') or contains(@t-esc, 'tax.tax.name')]" position="replace">
             <t t-set="tax_display_name" t-value="tax.name || (tax.tax &amp;&amp; tax.tax.name) || ''"/>
-            <t t-if="tax_display_name.toLowerCase().includes('impuesto interno')">
+            
+            <!-- CORRECCIÓN: Usamos un array con .some() para atrapar cualquier variante -->
+            <t t-if="['impuesto interno', 'imp interno', 'imp int'].some(pattern => tax_display_name.toLowerCase().includes(pattern))">
                 <span>Impuesto interno</span>
             </t>
             <t t-else="">
