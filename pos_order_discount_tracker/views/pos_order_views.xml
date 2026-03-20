@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inyectar campo en la vista Lista (Tree) -->
+    <record id="view_pos_order_tree_inherit_discount" model="ir.ui.view">
+        <field name="name">pos.order.tree.inherit.discount</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <!-- Ubicamos el nuevo campo justo antes del estado de la orden -->
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="applied_program_ids" widget="many2many_tags" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inyectar filtros de búsqueda y agrupación (Search) -->
+    <record id="view_pos_order_search_inherit_discount" model="ir.ui.view">
+        <field name="name">pos.order.search.inherit.discount</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_search"/>
+        <field name="arch" type="xml">
+            <!-- Añadimos las opciones dentro de la etiqueta <search> general -->
+            <xpath expr="//search" position="inside">
+                <!-- Búsqueda por texto directo -->
+                <field name="applied_program_ids" string="Descuento/Programa"/>
+                
+                <separator/>
+                <!-- Filtro predeterminado específico para un click rápido -->
+                <filter string="Es Cuenta Socio" 
+                        name="filter_cuenta_socio" 
+                        domain="[('applied_program_ids.name', 'ilike', 'Cuenta socio')]"/>
+                
+                <separator/>
+                <!-- Opción para agrupar las órdenes por el descuento aplicado -->
+                <filter string="Descuento Aplicado" 
+                        name="groupby_discount" 
+                        context="{'group_by': 'applied_program_ids'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
