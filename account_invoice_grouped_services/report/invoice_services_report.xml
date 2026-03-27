@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- 1. ACCIÓN DEL REPORTE -->
+        <record id="action_report_invoice_services" model="ir.actions.report">
+            <field name="name">PDF Factura (Servicios Agrupados)</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">account_invoice_grouped_services.report_invoice_grouped_wrapper</field>
+            <field name="report_file">account_invoice_grouped_services.report_invoice_grouped_wrapper</field>
+            <field name="print_report_name">(object._get_report_base_filename() + ' - Servicios')</field>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- 2. WRAPPER DINÁMICO -->
+        <template id="report_invoice_grouped_wrapper">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.partner_id.lang"/>
+                    <t t-set="is_grouped_report" t-value="True"/>
+                    <t t-set="report_template_name" t-value="o._get_name_invoice_report()"/>
+                    
+                    <t t-if="report_template_name == 'account.report_invoice_document'"
+                       t-call="account.report_invoice_document" t-lang="lang"/>
+                    <t t-elif="report_template_name == 'l10n_ar.report_invoice_document'"
+                       t-call="l10n_ar.report_invoice_document" t-lang="lang"/>
+                    <t t-else="">
+                        <t t-call="account.report_invoice_document" t-lang="lang"/>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- 3. HERENCIA ÚNICA Y MAESTRA (Con las 6 columnas) -->
+        <template id="report_invoice_document_inherit_grouped_base" inherit_id="account.report_invoice_document" priority="99">
+            
+            <xpath expr="//table[@name='invoice_line_table']/thead" position="attributes">
+                <attribute name="t-if">not is_grouped_report</attribute>
+            </xpath>
+            <xpath expr="//table[@name='invoice_line_table']/tbody[hasclass('invoice_tbody')]" position="attributes">
+                <attribute name="t-if">not is_grouped_report</attribute>
+            </xpath>
+
+            <!-- ENCABEZADO: 6 COLUMNAS -->
+            <xpath expr="//table[@name='invoice_line_table']/thead" position="after">
+                <thead t-if="is_grouped_report" style="display: table-row-group">
+                    <tr style="background-color: #005596; color: white;">
+                        <th name="th_description" class="text-start p-2" style="border: 1px solid #005596; width: 40%;"><span>DESCRIPCIÓN</span></th>
+                        <th name="th_quantity" class="text-end p-2" style="border: 1px solid #005596;"><span>CANTIDAD</span></th>
+                        <th name="th_priceunit" class="text-end p-2" style="border: 1px solid #005596;"><span>PRECIO UNITARIO</span></th>
+                        <th name="th_taxes" class="text-center p-2" style="border: 1px solid #005596;"><span>% IVA</span></th>
+                        <th name="th_subtotal" class="text-end p-2" style="border: 1px solid #005596;"><span>IMPORTE</span></th>
+                        <th name="th_total" class="text-end p-2" style="border: 1px solid #005596;"><span>TOTAL</span></th>
+                    </tr>
+                </thead>
+            </xpath>
+            
+            <!-- CUERPO: 6 COLUMNAS (VERSIÓN DEFENSIVA) -->
+            <xpath expr="//table[@name='invoice_line_table']/tbody[hasclass('invoice_tbody')]" position="after">
+                <tbody class="invoice_tbody" t-if="is_grouped_report">
+                    <t t-foreach="o._get_grouped_services_by_section()" t-as="group">
+                        <tr style="page-break-inside: avoid;">
+                            
+                            <!-- 1. Descripción -->
+                            <td name="account_invoice_line_name" class="p-2 text-start" style="border-bottom: 1px solid #dee2e6; border-left: 1px solid #005596;">
+                                <span t-esc="group.get('name', '')" t-options="{'widget': 'text'}" t-att-class="'fw-bold' if group.get('is_section') else ''"/>
+                            </td>
+                            
+                            <!-- 2. Cantidad -->
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <span t-esc="group.get('quantity', 0.0)" t-options='{"widget": "float", "precision": 2}'/>
+                                <span t-esc="group.get('uom_name', '')" class="ms-1"/>
+                            </td>
+                            
+                            <!-- 3. Precio Unitario -->
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <span class="text-nowrap" t-esc="group.get('price_unit', 0.0)" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            </td>
+                            
+                            <!-- 4. % IVA -->
+                            <td class="text-center p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <span t-esc="group.get('taxes_str', '')"/>
+                            </td>
+                            
+                            <!-- 5. Importe (Subtotal sin IVA) -->
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <!-- Mantenemos fallback a 'subtotal' por si acaso -->
+                                <span class="text-nowrap" t-esc="group.get('price_subtotal', group.get('subtotal', 0.0))" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            </td>
+                            
+                            <!-- 6. Total (Subtotal con IVA) -->
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6; border-right: 1px solid #005596;">
+                                <span class="text-nowrap" t-esc="group.get('price_total', 0.0)" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            </td>
+                            
+                        </tr>
+                    </t>
+                </tbody>
+            </xpath>
+            
+        </template>
+
+    </data>
+</odoo>
