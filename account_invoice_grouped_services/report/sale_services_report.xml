@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- 1. ACCIÓN DEL REPORTE -->
+        <record id="action_report_saleorder_services" model="ir.actions.report">
+            <field name="name">PDF Cotización (Servicios Agrupados)</field>
+            <field name="model">sale.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">account_invoice_grouped_services.report_saleorder_grouped_wrapper</field>
+            <field name="report_file">account_invoice_grouped_services.report_saleorder_grouped_wrapper</field>
+            <field name="print_report_name">(object.state in ('draft', 'sent') and 'Cotización - %s' % (object.name) or 'Orden - %s' % (object.name)) + ' - Servicios'</field>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- 2. WRAPPER (En ventas es simple porque no hay AFIP de por medio) -->
+        <template id="report_saleorder_grouped_wrapper">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-set="lang" t-value="doc.partner_id.lang"/>
+                    <t t-set="is_grouped_report" t-value="True"/>
+                    <t t-call="sale.report_saleorder_document" t-lang="lang"/>
+                </t>
+            </t>
+        </template>
+
+        <!-- 3. HERENCIA ÚNICA Y MAESTRA (Con Prioridad 99) -->
+        <template id="report_saleorder_document_inherit_grouped" inherit_id="sale.report_saleorder_document" priority="99">
+            
+            <!-- A. Ocultar la tabla original de ventas -->
+            <xpath expr="//table[hasclass('o_main_table')]/thead" position="attributes">
+                <attribute name="t-if">not is_grouped_report</attribute>
+            </xpath>
+            <xpath expr="//table[hasclass('o_main_table')]/tbody[hasclass('sale_tbody')]" position="attributes">
+                <attribute name="t-if">not is_grouped_report</attribute>
+            </xpath>
+
+            <!-- B. Inyectar nuestro ENCABEZADO azul oscuro -->
+            <xpath expr="//table[hasclass('o_main_table')]/thead" position="after">
+                <thead t-if="is_grouped_report" style="display: table-row-group">
+                    <tr style="background-color: #005596; color: white;">
+                        <th name="th_description" class="text-start p-2" style="border: 1px solid #005596; width: 40%;"><span>DESCRIPCIÓN</span></th>
+                        <th name="th_quantity" class="text-end p-2" style="border: 1px solid #005596;"><span>CANTIDAD</span></th>
+                        <th name="th_priceunit" class="text-end p-2" style="border: 1px solid #005596;"><span>PRECIO UNITARIO</span></th>
+                        <th name="th_taxes" class="text-center p-2" style="border: 1px solid #005596;"><span>% IVA</span></th>
+                        <th name="th_subtotal" class="text-end p-2" style="border: 1px solid #005596;"><span>IMPORTE</span></th>
+                        <th name="th_total" class="text-end p-2" style="border: 1px solid #005596;"><span>TOTAL</span></th>
+                    </tr>
+                </thead>
+            </xpath>
+            
+            <!-- C. Inyectar nuestro CUERPO (Usando 'doc' en lugar de 'o') -->
+            <xpath expr="//table[hasclass('o_main_table')]/tbody[hasclass('sale_tbody')]" position="after">
+                <tbody class="sale_tbody" t-if="is_grouped_report">
+                    <t t-foreach="doc._get_grouped_services_by_section()" t-as="group">
+                        <tr style="page-break-inside: avoid;">
+                            <td name="sale_order_line_name" class="p-2 text-start" style="border-bottom: 1px solid #dee2e6; border-left: 1px solid #005596;">
+                                <span t-esc="group.get('name', '')" t-options="{'widget': 'text'}" t-att-class="'fw-bold' if group.get('is_section') else ''"/>
+                            </td>
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <span t-esc="group.get('quantity', 0.0)" t-options='{"widget": "float", "precision": 2}'/>
+                                <span t-esc="group.get('uom_name', '')" class="ms-1"/>
+                            </td>
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <span class="text-nowrap" t-esc="group.get('price_unit', 0.0)" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                            </td>
+                            <td class="text-center p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <span t-esc="group.get('taxes_str', '')"/>
+                            </td>
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6;">
+                                <span class="text-nowrap" t-esc="group.get('price_subtotal', 0.0)" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                            </td>
+                            <td class="text-end p-2" style="border-bottom: 1px solid #dee2e6; border-right: 1px solid #005596;">
+                                <span class="text-nowrap" t-esc="group.get('price_total', 0.0)" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </xpath>
+            
+        </template>
+
+    </data>
+</odoo>

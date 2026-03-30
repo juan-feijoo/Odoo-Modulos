@@ -11,10 +11,10 @@
         Ideal para facturación de servicios complejos.
     """,
     'author': 'Outsource Juan',
-    'website': 'https://tudominio.com',
-    'depends': ['account', 'l10n_ar'],
+    'depends': ['account', 'l10n_ar', 'sale'],
     'data':[
         'report/invoice_services_report.xml',
+        'report/sale_services_report.xml',
     ],
     'installable': True,
     'application': False,
