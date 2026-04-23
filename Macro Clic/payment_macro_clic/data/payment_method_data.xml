@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="payment_method_macro_clic" model="payment.method">
+            <field name="name">Macro Clic</field>
+            <field name="code">macro_clic</field>
+            <field name="sequence">10</field>
+            <!-- Utilizamos un logo transparente/genérico en base64 para evitar el error de interfaz -->
+            <field name="image" type="base64" file="payment_macro_clic/static/description/icon.svg"/>
+        </record>
+    </data>
+</odoo>

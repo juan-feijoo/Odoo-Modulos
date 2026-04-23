@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_payment_group_document" inherit_id="l10n_ar_ux.report_payment_group_document" >
+        <xpath expr="//table[@name='payments_table']/thead/tr[1]/th[1]" position="after">
+            <th><span>Fecha de pago</span></th>
+        </xpath>
+        <xpath expr="//table[@name='payments_table']/tbody//tr[1]//td[1]" position="after">
+            <td><span t-field="check.date"/></td>
+        </xpath>
+    </template>
+</odoo>
+

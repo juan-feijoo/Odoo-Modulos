@@ -1,0 +1,10 @@
+/* Ocultar botón Auto y selector de fuentes */
+.o_web_sign_auto_button, 
+.o_web_sign_auto_select_style {
+    display: none !important;
+}
+
+/* Opcional: Si quieres que el botón "Trazar" se vea como el único y principal */
+.o_web_sign_draw_button {
+    margin-left: 0 !important;
+}

@@ -1,0 +1,19 @@
+.o_self_order_product_description_custom {
+    font-size: 0.85rem;
+    line-height: 1.2;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Número de líneas visibles en la card */
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    
+    p {
+        margin-bottom: 0;
+    }
+}
+
+// Ajuste opcional para que el nombre del producto no se pegue tanto a la descripción
+.self_order_product_card .product-infos span.fs-4 {
+    display: block;
+    margin-bottom: 2px !important;
+}

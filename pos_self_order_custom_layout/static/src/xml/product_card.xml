@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="pos_self_order.ProductCard" t-inherit-mode="extension">
+        <xpath expr="//span[hasclass('fs-4') and contains(@t-esc, 'props.product.name')]" position="after">
+            <div t-if="props.product.public_description" 
+                 class="o_self_order_product_description_custom text-muted mt-1"
+                 t-out="props.product.public_description"/>
+        </xpath>
+    </t>
+</templates>
