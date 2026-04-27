@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_final_generator_form_inherit_journal" model="ir.ui.view">
+        <field name="name">final.generator.form.inherit.journal</field>
+        <field name="model">final.generator</field>
+        <field name="inherit_id" ref="l10n_ar_asientos_de_cierre.view_final_generator_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='date']" position="after">
+                <!-- 1. Agregamos company_id invisible para que el domain no falle -->
+                <field name="company_id" readonly="true"/>
+                
+                <!-- 2. Nuestro campo de diario -->
+                <field name="journal_id" 
+                       options="{'no_create': True, 'no_open': True}" 
+                       readonly="patrimonial or refundicion"/>
+            </xpath>
+            
+        </field>
+    </record>
+</odoo>

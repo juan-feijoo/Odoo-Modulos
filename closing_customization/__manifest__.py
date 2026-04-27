@@ -10,6 +10,7 @@
     'data': [
         'views/account_account_views.xml',
         'views/account_journal_views.xml',
+        'views/final_generator_views.xml',
     ],
     "demo": [],
     "assets": {},
