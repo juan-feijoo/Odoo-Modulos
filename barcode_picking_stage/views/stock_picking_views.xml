@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. VISTA PARA EL TIPO DE OPERACIÓN -->
+    <record id="view_picking_type_form_inherit_barcode_flow" model="ir.ui.view">
+        <field name="name">stock.picking.type.form.inherit.barcode.flow</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.view_picking_type_form"/>
+        <field name="arch" type="xml">
+            <!-- Lo inyectamos de forma segura dentro de la pestaña general -->
+            <xpath expr="//page[@name='general']//group[@name='second']" position="inside">
+                <group string="Flujo Barcode (Prep. y Repaso)" name="custom_barcode_flow">
+                    <field name="flujo_doble_validacion" widget="boolean_toggle"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- 2. VISTA PARA EL PICKING -->
+    <record id="view_picking_form_inherit_barcode_flow" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.barcode.flow</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='extra']//group[@name='other_infos']" position="inside">
+                <separator string="Auditoría de Barcode" colspan="2"/>
+                <group col="2" colspan="2">
+                    <!-- CORRECCIÓN: Usamos 'not' (sintaxis Python) en lugar de '!' -->
+                    <field name="preparador_id" invisible="not preparador_id"/>
+                    <field name="fecha_preparacion" invisible="not fecha_preparacion"/>
+                    <field name="revisor_id" invisible="not revisor_id"/>
+                    <field name="fecha_repaso" invisible="not fecha_repaso"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

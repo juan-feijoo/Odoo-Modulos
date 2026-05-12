@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="stock_barcode.MainComponent" t-inherit-mode="extension">
+        <xpath expr="//button[contains(@class, 'o_validate_page')]" position="replace">
+            
+            <!-- FILTRO: Solo aplica si el tipo de operación tiene la config activada -->
+            <t t-if="env.model.record and env.model.record.flujo_doble_validacion">
+                
+                <!-- PASO 1: FINALIZAR PREPARACIÓN -->
+                <button t-if="env.model.displayValidateButton and !env.model.record.preparador_id" 
+                        t-on-click="finalizarPreparacion"
+                        t-att-disabled="!env.model.canBeValidate"
+                        class="o_validate_page btn btn-primary flex-grow-1 py-3 fw-bold">
+                    <i class="fa fa-check me-1"/> FINALIZAR PREPARACIÓN
+                </button>
+
+                <!-- PASO 2: INICIAR REPASO -->
+                <button t-if="env.model.displayValidateButton and env.model.record.preparador_id and !env.model.record.revisor_id" 
+                        t-on-click="iniciarRepaso"
+                        t-att-disabled="!env.model.canBeValidate"
+                        class="o_validate_page btn btn-info text-white flex-grow-1 py-3 fw-bold">
+                    <i class="fa fa-play me-1"/> INICIAR REPASO
+                </button>
+
+                <!-- PASO 3: VALIDAR -->
+                <button t-if="env.model.displayValidateButton and env.model.record.preparador_id and env.model.record.revisor_id" 
+                        t-on-click="validate"
+                        class="o_validate_page btn flex-grow-1 py-3 fw-bold"
+                        t-att-disabled="!env.model.canBeValidate"
+                        t-attf-class="{{env.model.highlightValidateButton ? 'btn-primary' : 'btn-secondary'}}">
+                    <i t-if="env.model.highlightValidateButton" class="fa fa-check me-1"/>
+                    <t t-out="env.model.validateButtonLabel"/>
+                </button>
+            </t>
+
+            <!-- PARA TODO LO DEMÁS: Comportamiento nativo de Odoo -->
+            <t t-else="">
+                <button t-if="env.model.displayValidateButton" 
+                        t-on-click="validate"
+                        class="o_validate_page btn flex-grow-1 py-3 fw-bold"
+                        t-att-disabled="!env.model.canBeValidate"
+                        t-attf-class="{{env.model.highlightValidateButton ? 'btn-primary' : 'btn-secondary'}}">
+                    <i t-if="env.model.highlightValidateButton" class="fa fa-check me-1"/>
+                    <t t-out="env.model.validateButtonLabel"/>
+                </button>
+            </t>
+            
+        </xpath>
+    </t>
+</templates>
