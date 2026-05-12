@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_payment_receipt_document_custom_nc" inherit_id="l10n_ar_tax.report_payment_receipt_document">
+        
+        <xpath expr="//table[@name='matching_table']" position="replace">
+            <table class="table table-sm o_main_table" name="matching_table">
+                <thead>
+                    <tr>
+                        <th><span>COMPROBANTES IMPUTADOS</span></th>
+                        <th class="text-center"><span>FECHA VENC.</span></th>
+                        <th class="text-end"><span>IMPORTE ORIGINAL</span></th>
+                        <th class="text-end"><span>IMPORTE IMPUTADO</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Usamos payment_bundle que contiene todos los pagos del recibo -->
+                    <t t-set="target_obj" t-value="payment_bundle if payment_bundle else o"/>
+                    <t t-set="total_imputed_val" t-value="0.0"/>
+                    
+                    <t t-foreach="target_obj._get_imputed_moves_data()" t-as="imputed">
+                        <tr>
+                            <td><span t-esc="imputed['move_name']"/></td>
+                            <td class="text-center">
+                                <span t-esc="imputed['date_due']" t-options='{"widget": "date"}'/>
+                            </td>
+                            <td class="text-end">
+                                <span t-esc="imputed['amount_original']" 
+                                      t-options='{"widget": "monetary", "display_currency": imputed["currency"]}'/>
+                            </td>
+                            <td class="text-end">
+                                <span t-esc="imputed['amount_imputed']" 
+                                      t-options='{"widget": "monetary", "display_currency": o.company_currency_id}'/>
+                                <t t-set="total_imputed_val" t-value="total_imputed_val + imputed['amount_imputed']"/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3"><strong>Total Imputado</strong></td>
+                        <td class="text-end">
+                            <strong t-esc="total_imputed_val" 
+                                    t-options='{"widget": "monetary", "display_currency": o.company_currency_id}'/>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </xpath>
+        
+    </template>
+</odoo>
