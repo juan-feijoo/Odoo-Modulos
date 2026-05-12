@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!-- Extiende el template ClosePosPopup -->
+    <t t-name="pos_cash_transfer.ClosePosPopup" t-inherit="point_of_sale.ClosePosPopup" t-inherit-mode="extension">
+        <!-- En Odoo 18 apuntamos al textarea directamente -->
+        <xpath expr="//textarea" position="before">
+            <div class="mb-3 p-3 bg-light rounded border">
+                <label class="form-label fw-bold text-primary" for="reserveCash">
+                    <i class="fa fa-lock me-2"/>Monto a reservar en caja
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-money"/></span>
+                    <input type="number" class="form-control form-control-lg" id="reserveCash" t-model="state.reserve_cash" placeholder="Monto a conservar para mañana"/>
+                </div>
+                <small class="text-muted">Este monto quedará como saldo inicial para la próxima sesión.</small>
+            </div>
+        </xpath>
+    </t>
+</templates>

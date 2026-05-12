@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_cash_transfer.CashMovePopup" t-inherit="point_of_sale.CashMovePopup" t-inherit-mode="extension">
+        <!-- Agregar el selector de diario antes del contenedor del motivo para evitar solapamiento -->
+        <xpath expr="//textarea[@t-model='state.reason']/parent::*" position="before">
+            <div class="form-group mb-3">
+                <label class="form-label fw-bold" for="branchJournalId">Diario de destino (Caja Chica)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-primary"><i class="fa fa-university"/></span>
+                    <select class="form-select form-select-lg" id="branchJournalId" t-model="state.branchJournalId">
+                        <option value="">-- Seleccione un diario --</option>
+                        <t t-foreach="branchJournals" t-as="journal" t-key="journal.id">
+                            <option t-att-value="journal.id">
+                                <t t-esc="journal.name"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+                <t t-if="!branchJournals.length">
+                    <div class="mt-1">
+                        <small class="text-danger fw-bold"><i class="fa fa-exclamation-triangle"/> No hay diarios marcados como 'Usar para transferencias'.</small>
+                    </div>
+                </t>
+            </div>            
+        </xpath>
+        <!-- Deshabilitar el botón Confirm si falta el diario o monto -->
+        <xpath expr="//button[contains(@t-on-click, 'confirm')]" position="attributes">
+            <attribute name="t-att-disabled">!state.amount or !state.branchJournalId</attribute>
+        </xpath>
+    </t>
+</templates>
